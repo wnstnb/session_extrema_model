@@ -10,6 +10,8 @@ st.set_page_config(
     page_icon='⚡',
 )
 
+st.title('⚡ Session Extrema Model')
+
 ticker_dict = {
     "^GSPC":{
         "hod_model":"models/hod_model_spx.joblib",
