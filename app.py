@@ -57,5 +57,5 @@ date_select = st.selectbox(
 )
 date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
 fig = create_viz(df_viz, date_select_str)
-st.plotly_chart(fig)
+st.plotly_chart(fig, use_container_width=True)
 # st.dataframe(df_viz.tail())
