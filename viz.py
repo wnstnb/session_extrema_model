@@ -12,7 +12,7 @@ def create_features(ticker_str):
     ticker = yf.Ticker(ticker_str)
     df = ticker.history(period='5d',interval='5m')
     df = df.loc[
-        (df.index.time >= datetime.time(9,45)) &\
+        (df.index.time >= datetime.time(9,30)) &\
         (df.index.time < datetime.time(16,0)),
     ['Open','High','Low','Close']]
     df.columns = ['open','high','low','close']
@@ -52,6 +52,12 @@ def create_features(ticker_str):
 
     df['gap_open'] = df['day_open'] - df['prev_close']
     df['gap_open_pct'] = df['gap_open'] / df['prev_close']
+
+    df = df.loc[
+        (df.index.time >= datetime.time(9,45)) &\
+        (df.index.time < datetime.time(16,0))
+    ]
+
     return df.dropna(subset=[
         'prev_close_pct',
         'gap_open_pct',
