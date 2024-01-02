@@ -1,0 +1,15 @@
+pandas
+numpy
+python-dotenv
+matplotlib
+sqlalchemy<2.0
+mysqlclient
+tqdm
+python-dotenv
+plotly
+nbformat>=4.2.0
+yfinance
+streamlit
+lightweight-charts
+scikit-learn==1.3.2
+joblib==1.3.2
