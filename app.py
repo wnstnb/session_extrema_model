@@ -58,4 +58,9 @@ date_select = st.selectbox(
 date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
 fig = create_viz(df_viz, date_select_str)
 st.plotly_chart(fig, use_container_width=True)
+df_res = df_viz[['high','low','pred_hod','pred_lod']]
+df_res['session_low'] = df_res['low'].expanding().min().round()
+df_res['session_high'] = df_res['high'].expanding().max().round()
+df_summary = df_res.loc[date_select_str:date_select_str,['session_low','session_high','pred_lod','pred_hod']]
+st.dataframe(df_summary[::-1])
 # st.dataframe(df_viz.tail())
