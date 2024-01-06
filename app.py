@@ -15,15 +15,21 @@ st.title('⚡ Session Extrema Model')
 ticker_dict = {
     "^GSPC":{
         "hod_model":"models/hod_model_spx.joblib",
-        "lod_model":"models/lod_model_spx.joblib"
+        "lod_model":"models/lod_model_spx.joblib",
+        "gd_model":"models/gd_model_spx.joblib",
+        "suffix":"SPX"
     },
     "^NDX":{
         "hod_model":"models/hod_model_ndx.joblib",
-        "lod_model":"models/lod_model_ndx.joblib"
+        "lod_model":"models/lod_model_ndx.joblib",
+        "gd_model":"models/gd_model_ndx.joblib",
+        "suffix":"NDX"
     },
     "^RUT":{
         "hod_model":"models/hod_model_rut.joblib",
-        "lod_model":"models/lod_model_rut.joblib"
+        "lod_model":"models/lod_model_rut.joblib",
+        "gd_model":"models/gd_model_rut.joblib",
+        "suffix":"RUT"
     }
 }
 
@@ -48,8 +54,9 @@ df_feats = create_features(ticker_select)
 
 hod_model = joblib.load(ticker_dict[ticker_select]['hod_model'])
 lod_model = joblib.load(ticker_dict[ticker_select]['lod_model'])
+gd_model = joblib.load(ticker_dict[ticker_select]['gd_model'])
 
-df_viz = create_preds_df(df_feats, hod_model, lod_model)
+df_viz = create_preds_df(df_feats, hod_model, lod_model, gd_model)
 viz_dates = sorted(set(df_viz.index.date))[::-1]
 date_select = st.selectbox(
     label='Select date for view',
@@ -59,8 +66,9 @@ date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
 fig = create_viz(df_viz, date_select_str)
 st.plotly_chart(fig, use_container_width=True)
 df_res = df_viz[['high','low','pred_hod','pred_lod']]
-df_res['session_low'] = df_res['low'].expanding().min().round()
-df_res['session_high'] = df_res['high'].expanding().max().round()
-df_summary = df_res.loc[date_select_str:date_select_str,['session_low','session_high','pred_lod','pred_hod']]
+df_summary = df_res.loc[date_select_str:date_select_str]
+df_summary['session_low'] = df_summary['low'].expanding().min().round()
+df_summary['session_high'] = df_summary['high'].expanding().max().round()
+df_summary = df_summary.loc[:,['session_low','session_high','pred_lod','pred_hod']]
 st.dataframe(df_summary[::-1])
 # st.dataframe(df_viz.tail())
