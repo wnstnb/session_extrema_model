@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import plotly.graph_objects as go
+import lightgbm
 
 def create_features(ticker_str):
     '''
@@ -41,6 +42,18 @@ def create_features(ticker_str):
         df.loc[day_str, 'prev_close_pts'] = df.loc[day_str, 'close'] - df.loc[day_str, 'prev_close']
         df.loc[day_str, 'prev_close_pct'] = df.loc[day_str, 'prev_close_pts'] / df.loc[day_str, 'prev_close']
 
+        # Lowest low
+        df.loc[day_str, 'lowest_low'] = df.loc[day_str, 'low'].expanding().min()
+        df.loc[day_str, 'lowest_low'] = df.loc[day_str, 'lowest_low'].shift(1)
+        df.loc[day_str, 'lowest_low'] = df.loc[day_str, 'lowest_low'].ffill()
+        df.loc[day_str, 'lowest_low_mag'] = (df.loc[day_str, 'close'] / df.loc[day_str, 'lowest_low']) - 1
+
+        # Highest high
+        df.loc[day_str, 'highest_high'] = df.loc[day_str, 'high'].expanding().max()
+        df.loc[day_str, 'highest_high'] = df.loc[day_str, 'highest_high'].shift(1)
+        df.loc[day_str, 'highest_high'] = df.loc[day_str, 'highest_high'].ffill()
+        df.loc[day_str, 'highest_high_mag'] = (df.loc[day_str, 'close'] / df.loc[day_str, 'highest_high']) - 1
+
         # Shifted
         df.loc[day_str, 'prev_close_pct_n1'] = df.loc[day_str, 'prev_close_pct'].shift(1)
         df.loc[day_str, 'prev_close_pct_n2'] = df.loc[day_str, 'prev_close_pct'].shift(2)
@@ -49,6 +62,7 @@ def create_features(ticker_str):
         df.loc[day_str, 'day_open_pct_n1'] = df.loc[day_str, 'day_open_pct'].shift(1)
         df.loc[day_str, 'day_open_pct_n2'] = df.loc[day_str, 'day_open_pct'].shift(2)
         df.loc[day_str, 'day_open_pct_n3'] = df.loc[day_str, 'day_open_pct'].shift(3)
+
 
     df['gap_open'] = df['day_open'] - df['prev_close']
     df['gap_open_pct'] = df['gap_open'] / df['prev_close']
@@ -65,12 +79,14 @@ def create_features(ticker_str):
         'prev_close_pct_n3'
     ])
 
-def create_preds_df(df_feats, hod_model1, lod_model1):
+def create_preds_df(df_feats, hod_model1, lod_model1, gd_model1):
     predicted_proba_hod = hod_model1.predict_proba(df_feats)[:,-1]
     predicted_proba_lod = lod_model1.predict_proba(df_feats)[:,-1]
+    predicted_proba_gd = gd_model1.predict_proba(df_feats)[:,-1]
     df_viz = df_feats.copy()
     df_viz['pred_hod'] = predicted_proba_hod
     df_viz['pred_lod'] = predicted_proba_lod
+    df_viz['pred_gd'] = predicted_proba_gd
     return df_viz
 
 def create_viz(df_viz, date_str):
@@ -85,6 +101,7 @@ def create_viz(df_viz, date_str):
 
     fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_hod'], mode='lines', name='pred_hod', yaxis='y2', line=dict(color='#ff5f5f')))
     fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_lod'], mode='lines', name='pred_lod', yaxis='y2', line=dict(color='#3399cc')))
+    fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_gd'], mode='lines', name='pred_gd', yaxis='y2', line=dict(color='#9400d3')))
 
     fig.add_shape(
         type="line",
