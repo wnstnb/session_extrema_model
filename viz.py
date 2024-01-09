@@ -97,7 +97,9 @@ def create_viz(df_viz, date_str):
                 open=df_use['open'],
                 high=df_use['high'],
                 low=df_use['low'],
-                close=df_use['close'])])
+                close=df_use['close'],
+                increasing_line_color='white', decreasing_line_color='gray',
+                increasing_fillcolor='white', decreasing_fillcolor='gray')])
 
     fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_hod'], mode='lines', name='pred_hod', yaxis='y2', line=dict(color='#ff5f5f')))
     fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_lod'], mode='lines', name='pred_lod', yaxis='y2', line=dict(color='#3399cc')))
@@ -106,13 +108,13 @@ def create_viz(df_viz, date_str):
     fig.add_shape(
         type="line",
         x0=df_use.index.min(),
-        x1=df_use.index.max(),
+        x1=df_use.index.max() + datetime.timedelta(minutes=25),
         y0=0.5,
         y1=0.5,
         yref='y2',
         line=dict(
-            color="Red",
-            width=1.5,
+            color="Yellow",
+            width=1,
             dash="dash",
         )
     )
@@ -134,9 +136,9 @@ def create_viz(df_viz, date_str):
             color="#ffffff"
         ),
         align="center",
-        arrowhead=2,
+        arrowhead=0,
         arrowsize=1,
-        arrowwidth=2,
+        arrowwidth=1,
         arrowcolor="#636363",
         ax=20,
         ay=-30,
@@ -158,9 +160,9 @@ def create_viz(df_viz, date_str):
             color="#ffffff"
         ),
         align="center",
-        arrowhead=2,
+        arrowhead=0,
         arrowsize=1,
-        arrowwidth=2,
+        arrowwidth=1,
         arrowcolor="#636363",
         ax=20,
         ay=30,  # Adjust the y offset for the annotation
@@ -173,6 +175,84 @@ def create_viz(df_viz, date_str):
 
     latest_close_time = df_use.index[-1]
     latest_close = df_use['close'].iloc[-1]
+
+    latest_pred_hod_time = df_use.index[-1]
+    latest_pred_hod = df_use['pred_hod'].iloc[-1]
+    fig.add_annotation(
+        x=latest_pred_hod_time,
+        y=latest_pred_hod,
+        yref='y2',
+        text=f"{latest_pred_hod:.0%}",
+        showarrow=True,
+        font=dict(
+            family="Courier New, monospace",
+            size=12,
+            color="#ffffff"
+        ),
+        align="center",
+        arrowhead=0,
+        arrowsize=1,
+        arrowwidth=1,
+        arrowcolor="#636363",
+        ax=40,
+        ay=0,
+        borderwidth=1,
+        borderpad=1,
+        bgcolor="#ff5f5f",
+        opacity=0.8
+    )
+
+    latest_pred_lod_time = df_use.index[-1]
+    latest_pred_lod = df_use['pred_lod'].iloc[-1]
+    fig.add_annotation(
+        x=latest_pred_lod_time,
+        y=latest_pred_lod,
+        yref='y2',
+        text=f"{latest_pred_lod:.0%}",
+        showarrow=True,
+        font=dict(
+            family="Courier New, monospace",
+            size=12,
+            color="#ffffff"
+        ),
+        align="center",
+        arrowhead=0,
+        arrowsize=1,
+        arrowwidth=1,
+        arrowcolor="#636363",
+        ax=40,
+        ay=0,
+        borderwidth=1,
+        borderpad=1,
+        bgcolor="#3399cc",
+        opacity=0.8
+    )
+
+    latest_pred_gd_time = df_use.index[-1]
+    latest_pred_gd = df_use['pred_gd'].iloc[-1]
+    fig.add_annotation(
+        x=latest_pred_gd_time,
+        y=latest_pred_gd,
+        yref='y2',
+        text=f"{latest_pred_gd:.0%}",
+        showarrow=True,
+        font=dict(
+            family="Courier New, monospace",
+            size=12,
+            color="#ffffff"
+        ),
+        align="center",
+        arrowhead=0,
+        arrowsize=1,
+        arrowwidth=1,
+        arrowcolor="#636363",
+        ax=40,
+        ay=0,
+        borderwidth=1,
+        borderpad=1,
+        bgcolor="#9400d3",
+        opacity=0.8
+    )
 
     fig.add_annotation(
         x=latest_close_time,
@@ -187,7 +267,7 @@ def create_viz(df_viz, date_str):
         align="center",
         arrowhead=0,
         arrowsize=1,
-        arrowwidth=2,
+        arrowwidth=1,
         arrowcolor="#636363",
         ax=40,
         ay=0,
