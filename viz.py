@@ -171,6 +171,33 @@ def create_viz(df_viz, date_str):
         opacity=0.8
     )
 
+    latest_close_time = df_use.index[-1]
+    latest_close = df_use['close'].iloc[-1]
+
+    fig.add_annotation(
+        x=latest_close_time,
+        y=latest_close,
+        text=f"{str(int(latest_close))}",
+        showarrow=True,
+        font=dict(
+            family="Courier New, monospace",
+            size=12,
+            color="#ffffff"
+        ),
+        align="center",
+        arrowhead=0,
+        arrowsize=1,
+        arrowwidth=2,
+        arrowcolor="#636363",
+        ax=40,
+        ay=0,
+        # bordercolor="#c7c7c7",
+        borderwidth=1,
+        borderpad=1,
+        bgcolor="#000000",
+        opacity=0.8
+    )
+
     fig.update_layout(
         template='plotly_dark',
         yaxis=dict(
@@ -179,7 +206,8 @@ def create_viz(df_viz, date_str):
         yaxis2=dict(
             overlaying='y',
             side='right',
-            tickformat=".0%"
+            tickformat=".0%",
+            showgrid=False
         ),
         legend=dict(
             orientation="h",
