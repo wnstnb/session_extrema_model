@@ -91,6 +91,7 @@ df_summary = df_res.loc[date_select_str:date_select_str]
 df_summary['session_low'] = df_summary['low'].expanding().min().round()
 df_summary['session_high'] = df_summary['high'].expanding().max().round()
 df_summary = df_summary.loc[:,['time','session_low','session_high','pred_lod','pred_hod']]
+df_summary = df_summary[::-1]
 df_summary = df_summary.set_index('time')
-st.dataframe(df_summary[::-1])
+st.dataframe(df_summary)
 # st.dataframe(df_viz.tail())
