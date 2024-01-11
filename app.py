@@ -4,6 +4,9 @@ import numpy as np
 import datetime
 import joblib
 from viz import *
+from streamlit_autorefresh import st_autorefresh
+import time
+
 
 st.set_page_config(
     page_title='Session Extrema Model',
@@ -42,6 +45,7 @@ ticker_select = st.selectbox(
     ]
 )
 
+
 # Function to convert time string to seconds past midnight
 def convert_time_to_seconds(time_series):
     return time_series.apply(lambda x: x.hour * 3600 + x.minute * 60 + x.second)
@@ -62,6 +66,23 @@ date_select = st.selectbox(
     label='Select date for view',
     options=viz_dates
 )
+
+col1, col2 = st.columns(2)
+with col1:
+    auto_refresh = st.toggle('Enable Auto-Refresh', value=False)
+    if auto_refresh:
+        st_autorefresh(interval=60*1000, key="autorefresh_data")
+
+with col2:
+    if auto_refresh:
+        tn = datetime.datetime.now() + datetime.timedelta(seconds=60)
+        bt = st.button(f"Next refresh at: {tn.hour}:{tn.minute}:{tn.second}", disabled=True)
+    else:
+        bt = st.button("Manual Refresh")
+        if bt:
+            st.rerun()
+
+
 date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
 fig = create_viz(df_viz, date_select_str)
 st.plotly_chart(fig, use_container_width=True)
