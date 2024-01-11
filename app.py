@@ -86,10 +86,10 @@ with col2:
 date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
 fig = create_viz(df_viz, date_select_str)
 st.plotly_chart(fig, use_container_width=True)
-df_res = df_viz[['time','high','low','pred_hod','pred_lod']]
+df_res = df_viz[['high','low','pred_hod','pred_lod']]
 df_summary = df_res.loc[date_select_str:date_select_str]
 df_summary['sesh_lo'] = df_summary['low'].expanding().min().round()
 df_summary['sesh_hi'] = df_summary['high'].expanding().max().round()
-df_summary = df_summary.loc[:,['time','sesh_lo','sesh_hi','pred_lod','pred_hod']]
-st.dataframe(df_summary = df_summary[::-1])
+df_summary = df_summary.loc[:,['sesh_lo','sesh_hi','pred_lod','pred_hod']]
+st.dataframe(df_summary[::-1])
 # st.dataframe(df_viz.tail())
