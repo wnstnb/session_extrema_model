@@ -4,7 +4,7 @@ import numpy as np
 import datetime
 import joblib
 from viz import *
-from streamlit_autorefresh import st_autorefresh
+# from streamlit_autorefresh import st_autorefresh
 import time
 
 
@@ -67,29 +67,18 @@ date_select = st.selectbox(
     options=viz_dates
 )
 
-col1, col2 = st.columns(2)
-with col1:
-    auto_refresh = st.toggle('Enable Auto-Refresh', value=False)
-    if auto_refresh:
-        st_autorefresh(interval=60*1000, key="autorefresh_data")
-
-with col2:
-    if auto_refresh:
-        tn = datetime.datetime.now() + datetime.timedelta(seconds=60)
-        bt = st.button(f"Next refresh at: {tn.hour}:{tn.minute}:{tn.second}", disabled=True)
-    else:
-        bt = st.button("Manual Refresh")
-        if bt:
-            st.rerun()
+bt = st.button("Manual Refresh")
+if bt:
+    st.rerun()
 
 
 date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
 fig = create_viz(df_viz, date_select_str)
 st.plotly_chart(fig, use_container_width=True)
-df_res = df_viz[['high','low','pred_hod','pred_lod']]
+df_res = df_viz[['highest_high','lowest_low','pred_hod','pred_lod']]
 df_summary = df_res.loc[date_select_str:date_select_str]
-df_summary['sesh_lo'] = df_summary['low'].expanding().min().round()
-df_summary['sesh_hi'] = df_summary['high'].expanding().max().round()
-df_summary = df_summary.loc[:,['sesh_lo','sesh_hi','pred_lod','pred_hod']]
+df_summary['highest_high'] = df_summary['highest_high'].astype(int)
+df_summary['lowest_low'] = df_summary['lowest_low'].astype(int)
+df_summary = df_summary.loc[:,['lowest_low','highest_high','pred_lod','pred_hod']]
 st.dataframe(df_summary[::-1])
 # st.dataframe(df_viz.tail())

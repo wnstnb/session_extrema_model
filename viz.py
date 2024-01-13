@@ -6,6 +6,13 @@ import datetime
 import plotly.graph_objects as go
 import lightgbm
 
+# Create a list of times from 9:30 to 15:55 with 5 minute intervals
+times = pd.date_range(start="9:30", end="15:55", freq='5min').time
+
+# Create a dictionary that maps each time to a unique integer
+time_to_int = {time: i+1 for i, time in enumerate(times)}
+
+
 def create_features(ticker_str):
     '''
     Function to create dataframe of features for top/bottom model.
@@ -24,6 +31,9 @@ def create_features(ticker_str):
     df['prev_close'] = df['prev_close'].ffill()
     df['eod_close'] = df['eod_close'].bfill()
     df['green_day'] = df['eod_close'] > df['prev_close']
+
+    # Assume df is your DataFrame and 'time' is your column of times
+    df['bar_num'] = df['time'].map(time_to_int)
 
     df['eod_close_pts'] = df['eod_close'] - df['prev_close']
     df['eod_close_pct'] = df['eod_close_pts'] / df['prev_close']
@@ -63,7 +73,14 @@ def create_features(ticker_str):
         df.loc[day_str, 'day_open_pct_n2'] = df.loc[day_str, 'day_open_pct'].shift(2)
         df.loc[day_str, 'day_open_pct_n3'] = df.loc[day_str, 'day_open_pct'].shift(3)
 
+        # New Features
+        df.loc[day_str, 'open_slope'] = df.loc[day_str, 'day_open_pct'] / df.loc[day_str, 'bar_num']
+        df.loc[day_str, 'daily_slope'] = df.loc[day_str, 'prev_close_pct'] / df.loc[day_str, 'bar_num']
 
+        df.loc[day_str, 'highest_high_slope'] = (df.loc[day_str, 'close'] - df.loc[day_str, 'highest_high']) / df.loc[day_str, 'bar_num']
+        df.loc[day_str, 'lowest_low_slope'] = (df.loc[day_str, 'close'] - df.loc[day_str, 'lowest_low']) / df.loc[day_str, 'bar_num']
+    
+        
     df['gap_open'] = df['day_open'] - df['prev_close']
     df['gap_open_pct'] = df['gap_open'] / df['prev_close']
 
@@ -119,10 +136,10 @@ def create_viz(df_viz, date_str):
         )
     )
 
-    max_high = df_use['high'].max()
+    max_high = df_use['highest_high'].max()
     max_high_time = df_use['high'].idxmax()
 
-    min_low = df_use['low'].min()
+    min_low = df_use['lowest_low'].min()
     min_low_time = df_use['low'].idxmin()
 
     fig.add_annotation(
