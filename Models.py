@@ -66,6 +66,7 @@ def apply_convert_time_to_seconds(x):
 
 df_feats = create_features(ticker_select)
 
+# Add this
 if model_type_select == 'Main':
     hod_model = joblib.load(ticker_dict[ticker_select]['hod_model'])
     lod_model = joblib.load(ticker_dict[ticker_select]['lod_model'])
