@@ -20,12 +20,18 @@ ticker_dict = {
         "hod_model":"models/hod_model_spx.joblib",
         "lod_model":"models/lod_model_spx.joblib",
         "gd_model":"models/gd_model_spx.joblib",
+        "hod_model_cv":"models/hod_model_cv_spx.joblib",
+        "lod_model_cv":"models/lod_model_cv_spx.joblib",
+        "gd_model_cv":"models/gd_model_cv_spx.joblib",
         "suffix":"SPX"
     },
     "^NDX":{
         "hod_model":"models/hod_model_ndx.joblib",
         "lod_model":"models/lod_model_ndx.joblib",
         "gd_model":"models/gd_model_ndx.joblib",
+        "hod_model_cv":"models/hod_model_cv_ndx.joblib",
+        "lod_model_cv":"models/lod_model_cv_ndx.joblib",
+        "gd_model_cv":"models/gd_model_cv_ndx.joblib",
         "suffix":"NDX"
     },
     "^RUT":{
@@ -40,10 +46,14 @@ ticker_select = st.selectbox(
     label='Choose Ticker', 
     options=[
         "^NDX",
-        "^RUT",
+        # "^RUT", # Removing, as there isn't a good realtime-ish datasource for it rn
         "^GSPC",
     ]
 )
+
+with st.sidebar:
+    model_type_select = st.selectbox(label='Model Type', options=['Main', 'CV'])
+    st.success(f'{model_type_select} loaded!')
 
 
 # Function to convert time string to seconds past midnight
@@ -56,9 +66,14 @@ def apply_convert_time_to_seconds(x):
 
 df_feats = create_features(ticker_select)
 
-hod_model = joblib.load(ticker_dict[ticker_select]['hod_model'])
-lod_model = joblib.load(ticker_dict[ticker_select]['lod_model'])
-gd_model = joblib.load(ticker_dict[ticker_select]['gd_model'])
+if model_type_select == 'Main':
+    hod_model = joblib.load(ticker_dict[ticker_select]['hod_model'])
+    lod_model = joblib.load(ticker_dict[ticker_select]['lod_model'])
+    gd_model = joblib.load(ticker_dict[ticker_select]['gd_model'])
+elif model_type_select == 'CV':
+    hod_model = joblib.load(ticker_dict[ticker_select]['hod_model_cv'])
+    lod_model = joblib.load(ticker_dict[ticker_select]['lod_model_cv'])
+    gd_model = joblib.load(ticker_dict[ticker_select]['gd_model_cv'])
 
 df_viz = create_preds_df(df_feats, hod_model, lod_model, gd_model)
 viz_dates = sorted(set(df_viz.index.date))[::-1]
