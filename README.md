@@ -5,7 +5,7 @@ colorFrom: blue
 colorTo: purple
 sdk: streamlit
 sdk_version: 1.28.2
-app_file: app.py
+app_file: Models.py
 pinned: false
 license: mit
 ---
