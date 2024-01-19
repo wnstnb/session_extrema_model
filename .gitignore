@@ -8,4 +8,4 @@ models/lod_model_cv_ndx.joblib
 models/hod_model_cv_ndx.joblib
 models/gd_model_cv_spx.joblib
 models/hod_model_cv_spx.joblib
-models/hod_model_cv_spx.joblib
+models/lod_model_cv_spx.joblib
