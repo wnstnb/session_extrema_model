@@ -42,18 +42,25 @@ ticker_dict = {
     }
 }
 
-ticker_select = st.selectbox(
-    label='Choose Ticker', 
-    options=[
-        "^NDX",
-        # "^RUT", # Removing, as there isn't a good realtime-ish datasource for it rn
-        "^GSPC",
-    ]
-)
+# ticker_select = st.selectbox(
+#     label='Choose Ticker', 
+#     options=[
+#         "^NDX",
+#         # "^RUT", # Removing, as there isn't a good realtime-ish datasource for it rn
+#         "^GSPC",
+#     ]
+# )
+
 
 with st.sidebar:
-    model_type_select = st.selectbox(label='Model Type', options=['Main', 'CV'])
-    st.success(f'{model_type_select} loaded!')
+    # model_type_select = st.selectbox(label='Model Type', options=['Main', 'CV'])
+    ma_smoothing = st.selectbox(
+    label="EMA Smoothing",
+    options=[
+        False,
+        True
+    ]
+    )
 
 
 # Function to convert time string to seconds past midnight
@@ -63,22 +70,10 @@ def convert_time_to_seconds(time_series):
 def apply_convert_time_to_seconds(x):
     return x.apply(convert_time_to_seconds)
 
-
-df_feats = create_features(ticker_select)
-
-# Test
-if model_type_select == 'Main':
-    hod_model = joblib.load(ticker_dict[ticker_select]['hod_model'])
-    lod_model = joblib.load(ticker_dict[ticker_select]['lod_model'])
-    gd_model = joblib.load(ticker_dict[ticker_select]['gd_model'])
-
-# elif model_type_select == 'CV':
-#     hod_model = joblib.load(ticker_dict[ticker_select]['hod_model_cv'])
-#     lod_model = joblib.load(ticker_dict[ticker_select]['lod_model_cv'])
-#     gd_model = joblib.load(ticker_dict[ticker_select]['gd_model_cv'])
-
-df_viz = create_preds_df(df_feats, hod_model, lod_model, gd_model)
-viz_dates = sorted(set(df_viz.index.date))[::-1]
+# Get dates for date_select
+_ticker = yf.Ticker('^GSPC')
+_df = _ticker.history(period='5d',interval='5m')
+viz_dates = sorted(set(_df.index.date))[::-1]
 date_select = st.selectbox(
     label='Select date for view',
     options=viz_dates
@@ -88,14 +83,29 @@ bt = st.button("Manual Refresh")
 if bt:
     st.rerun()
 
+for ticker_select in ['^GSPC','^NDX']:
 
-date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
-fig = create_viz(df_viz, date_select_str)
-st.plotly_chart(fig, use_container_width=True)
-df_res = df_viz[['highest_high','lowest_low','pred_hod','pred_lod']]
-df_summary = df_res.loc[date_select_str:date_select_str]
-df_summary['highest_high'] = df_summary['highest_high'].astype(int)
-df_summary['lowest_low'] = df_summary['lowest_low'].astype(int)
-df_summary = df_summary.loc[:,['lowest_low','highest_high','pred_lod','pred_hod']]
-st.dataframe(df_summary[::-1])
-# st.dataframe(df_viz.tail())
+    df_feats = create_features(ticker_select)
+
+    # Test
+    hod_model = joblib.load(ticker_dict[ticker_select]['hod_model'])
+    lod_model = joblib.load(ticker_dict[ticker_select]['lod_model'])
+    gd_model = joblib.load(ticker_dict[ticker_select]['gd_model'])
+
+    # elif model_type_select == 'CV':
+    #     hod_model = joblib.load(ticker_dict[ticker_select]['hod_model_cv'])
+    #     lod_model = joblib.load(ticker_dict[ticker_select]['lod_model_cv'])
+    #     gd_model = joblib.load(ticker_dict[ticker_select]['gd_model_cv'])
+
+    df_viz = create_preds_df(df_feats, hod_model, lod_model, gd_model)
+    date_select_str = datetime.datetime.strftime(date_select, '%Y-%m-%d')
+    fig = create_viz(df_viz, date_select_str, ticker_name=ticker_select, smoothing=ma_smoothing)
+    with st.expander(f'{ticker_select} Chart'):
+        st.plotly_chart(fig, use_container_width=True)
+    # df_res = df_viz[['highest_high','lowest_low','pred_hod','pred_lod']]
+    # df_summary = df_res.loc[date_select_str:date_select_str]
+    # df_summary['highest_high'] = df_summary['highest_high'].astype(int)
+    # df_summary['lowest_low'] = df_summary['lowest_low'].astype(int)
+    # df_summary = df_summary.loc[:,['lowest_low','highest_high','pred_lod','pred_hod']]
+    # st.dataframe(df_summary[::-1])
+    # st.dataframe(df_viz.tail())

@@ -106,7 +106,7 @@ def create_preds_df(df_feats, hod_model1, lod_model1, gd_model1):
     df_viz['pred_gd'] = predicted_proba_gd
     return df_viz
 
-def create_viz(df_viz, date_str):
+def create_viz(df_viz, date_str, ticker_name=None, smoothing=False):
 
     df_use = df_viz.loc[date_str:date_str]
     
@@ -118,9 +118,9 @@ def create_viz(df_viz, date_str):
                 increasing_line_color='white', decreasing_line_color='gray',
                 increasing_fillcolor='white', decreasing_fillcolor='gray')])
 
-    fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_hod'], mode='lines', name='pred_hod', yaxis='y2', line=dict(color='#ff5f5f')))
-    fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_lod'], mode='lines', name='pred_lod', yaxis='y2', line=dict(color='#3399cc')))
-    fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_gd'], mode='lines', name='pred_gd', yaxis='y2', line=dict(color='#9400d3')))
+    fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_hod'].ewm(0.5).mean() if smoothing else df_use['pred_hod'], mode='lines', name='pred_hod', yaxis='y2', line=dict(color='#ff5f5f')))
+    fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_lod'].ewm(0.5).mean() if smoothing else df_use['pred_lod'], mode='lines', name='pred_lod', yaxis='y2', line=dict(color='#3399cc')))
+    fig.add_trace(go.Scatter(x=df_use.index, y=df_use['pred_gd'].ewm(0.5).mean() if smoothing else df_use['pred_gd'], mode='lines', name='pred_gd', yaxis='y2', line=dict(color='#9400d3')))
 
     fig.add_shape(
         type="line",
@@ -313,7 +313,7 @@ def create_viz(df_viz, date_str):
             xanchor="right",
             x=1
         ),
-        title='OHLC vs Prediction Over Time',
+        # title=f'{ticker_name} Chart',
         xaxis_rangeslider_visible=False
     )
 
