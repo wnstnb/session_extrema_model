@@ -71,10 +71,11 @@ if model_type_select == 'Main':
     hod_model = joblib.load(ticker_dict[ticker_select]['hod_model'])
     lod_model = joblib.load(ticker_dict[ticker_select]['lod_model'])
     gd_model = joblib.load(ticker_dict[ticker_select]['gd_model'])
-elif model_type_select == 'CV':
-    hod_model = joblib.load(ticker_dict[ticker_select]['hod_model_cv'])
-    lod_model = joblib.load(ticker_dict[ticker_select]['lod_model_cv'])
-    gd_model = joblib.load(ticker_dict[ticker_select]['gd_model_cv'])
+
+# elif model_type_select == 'CV':
+#     hod_model = joblib.load(ticker_dict[ticker_select]['hod_model_cv'])
+#     lod_model = joblib.load(ticker_dict[ticker_select]['lod_model_cv'])
+#     gd_model = joblib.load(ticker_dict[ticker_select]['gd_model_cv'])
 
 df_viz = create_preds_df(df_feats, hod_model, lod_model, gd_model)
 viz_dates = sorted(set(df_viz.index.date))[::-1]
