@@ -7,7 +7,7 @@ st.set_page_config(
 )
 
 st.title('📆 Economic Calendar')
-st.text("Use this to see what significant events are scheduled. Don't be offsides.")
+st.markdown("Use this to see what significant events are scheduled. **Don't be offsides.**")
 
 # HTML code
 html_code = """
